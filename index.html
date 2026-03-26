@@ -306,28 +306,41 @@
     }
 
     function submitAll() {
-      const payload = {
-        firstName: answers.firstName,
-        email: answers.email,
-        answers,
-        feedback,
-        results: builtResults
-      };
+  const payload = {
+    firstName: answers.firstName,
+    email: answers.email,
+    answers,
+    feedback,
+    results: builtResults
+  };
 
-      console.log("Final payload to send:", payload);
+  console.log("Final payload to send:", payload);
+  console.log("Apps Script URL:", APPS_SCRIPT_URL);
 
-      fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-        .then(r => r.text())
-        .then(t => console.log("Apps Script response:", t))
-        .catch(err => console.error("Error sending to Apps Script:", err));
-
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+    .then(r => {
+      console.log("Response received, status:", r.status);
+      if (!r.ok) {
+        console.error("HTTP Error:", r.status, r.statusText);
+      }
+      return r.text();
+    })
+    .then(t => {
+      console.log("Response text:", t);
+      console.log("Apps Script response:", t);
       endScreen();
-    }
-
+    })
+    .catch(err => {
+      console.error("Fetch failed - Detailed error:", err);
+      console.error("Error message:", err.message);
+      console.error("Error type:", typeof err);
+      endScreen(); // Still show end screen
+    });
+}
     function endScreen() {
       const name = answers.firstName || "you";
       app.innerHTML = `
