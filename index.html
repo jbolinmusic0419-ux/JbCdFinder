@@ -114,13 +114,15 @@
   <div class="container">
     <h1>JB CD Finder</h1>
     <div class="subtitle">
-      Answer a few quick questions and I'll match you with CD options that fit your amount, timeframe, and priorities.
+      Answer a few quick questions and I’ll match you with CD options that fit your amount and timeframe.
     </div>
     <div id="app"></div>
   </div>
 
   <script>
-    https://script.google.com/macros/s/AKfycbwhM5kW50Ozriz_R4Ne2325Ruq4LTINc1gRgfIRy06itCbuUllR4vtgIq67FDVJS2uv/exec2UZddiFzXH90/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhM5kW50Ozriz_R4Ne2325Ruq4LTINc1gRgfIRy06itCbuUllR4vtgIq67FDVJS2uv/exec";
+    console.log("Using Apps Script URL:", APPS_SCRIPT_URL);
+
     let step = 0;
     let feedbackStep = 0;
     const answers = {};
@@ -128,35 +130,21 @@
     let builtResults = [];
 
     const questions = [
-      { id: "firstName", text: "First, what's your first name?", type: "text", placeholder: "Johnny" },
+      { id: "firstName", text: "First, what’s your first name?", type: "text", placeholder: "Johnny" },
       { id: "email", text: "What email should I send your CD matches to?", type: "email", placeholder: "you@example.com" },
       { id: "amountChoice", text: "How much do you want to invest in CDs?", type: "select", options: ["$500", "$1,000", "$5,000", "$10,000+"] },
       { id: "timeframe", text: "How long can you leave the money in a CD?", type: "select", options: ["3 months", "6 months", "12 months", "18+ months"] },
-      { id: "mindeposit", text: "What's the minimum deposit you're comfortable with?", type: "select", options: ["$500", "$1,000", "$5,000", "No preference"] },
-      { id: "currentrate", text: "What rate are you earning now (roughly)?", type: "select", options: ["I'm not sure", "1%", "2%", "3%", "4%+", "I'm just in cash"] },
+      { id: "mindeposit", text: "What’s the minimum deposit you're comfortable with?", type: "select", options: ["$500", "$1,000", "$5,000", "No preference"] },
+      { id: "currentrate", text: "What rate are you earning now (roughly)?", type: "select", options: ["I’m not sure", "1%", "2%", "3%", "4%+", "I’m just in cash"] },
       { id: "penalty", text: "How important is a low early withdrawal penalty?", type: "select", options: ["Not important", "Somewhat important", "Very important"] },
       { id: "addon", text: "Would you like to add more money over time if allowed?", type: "select", options: ["Yes", "No", "Not sure"] },
-      { id: "numresults", text: "How many CD options would you like?", type: "select", options: ["3", "5", "10"] },
-      {
-        id: "price",
-        text: "What would you feel comfortable paying each month for personalized investment updates and opportunities, {name}?",
-        type: "select",
-        options: [
-          "$0 — I just want the free version",
-          "$5 — A small monthly fee is fine",
-          "$10 — Worth it if it saves me time",
-          "$15 — Worth it if it boosts my returns",
-          "$20+ — I'd pay more for premium alerts",
-          "Custom amount"
-        ]
-      }
+      { id: "numresults", text: "How many CD options would you like?", type: "select", options: ["3", "5", "10"] }
     ];
 
     const feedbackQuestions = [
       { id: "rating", text: "How helpful were these CD matches?", type: "select", options: ["1", "2", "3", "4", "5"] },
       { id: "feedback", text: "Anything you wish this tool did better?", type: "textarea" },
-      { id: "recommend", text: "Would you recommend this tool to a friend?", type: "select", options: ["Yes", "No", "Not sure"] },
-      { id: "priceConfirm", text: "Does the monthly amount you chose still feel right?", type: "select", options: ["Yes", "I'd pay less", "I'd pay more", "Not sure"] }
+      { id: "recommend", text: "Would you recommend this tool to a friend?", type: "select", options: ["Yes", "No", "Not sure"] }
     ];
 
     const app = document.getElementById("app");
@@ -306,50 +294,56 @@
     }
 
     function submitAll() {
-  const payload = {
-    firstName: answers.firstName,
-    email: answers.email,
-    answers,
-    feedback,
-    results: builtResults
-  };
+      const payload = {
+        firstName: answers.firstName,
+        email: answers.email,
+        answers,
+        feedback,
+        results: builtResults
+      };
 
-  console.log("Final payload to send:", payload);
-  console.log("Apps Script URL:", APPS_SCRIPT_URL);
+      console.log("Final payload to send:", payload);
+      console.log("Apps Script URL:", APPS_SCRIPT_URL);
 
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  })
-    .then(r => {
-      console.log("Response received, status:", r.status);
-      if (!r.ok) {
-        console.error("HTTP Error:", r.status, r.statusText);
-      }
-      return r.text();
-    })
-    .then(t => {
-      console.log("Response text:", t);
-      console.log("Apps Script response:", t);
-      endScreen();
-    })
-    .catch(err => {
-      console.error("Fetch failed - Detailed error:", err);
-      console.error("Error message:", err.message);
-      console.error("Error type:", typeof err);
-      endScreen(); // Still show end screen
-    });
-}
-    function endScreen() {
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(r => r.text())
+        .then(t => {
+          console.log("Apps Script response:", t);
+          endScreen();
+        })
+        .catch(err => {
+          console.error("Fetch failed - Detailed error:", err);
+          console.error("Error message:", err.message);
+          console.error("Error type:", typeof err);
+          endScreen(true);
+        });
+    }
+
+    function endScreen(hadError) {
       const name = answers.firstName || "you";
       app.innerHTML = `
         <div class="question">Thanks, ${name}.</div>
-        <div class="subtitle">Your results have been logged and emailed if you provided an address.</div>
+        <div class="subtitle">
+          ${hadError
+            ? "Something went wrong sending your results to the server, but your answers were collected in this session."
+            : "Your results have been logged and emailed if you provided an address."}
+        </div>
       `;
     }
+
+    // Expose navigation for inline onclick
+    window.next = next;
+    window.prev = prev;
+    window.startFeedback = startFeedback;
+    window.nextFeedback = nextFeedback;
+    window.prevFeedback = prevFeedback;
 
     renderQuestion();
   </script>
 </body>
 </html>
+
