@@ -1,45 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>JB CD Finder</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<style>
-body {
-  font-family: system-ui;
-  background: #0b1020;
-  color: white;
-  display: flex;
-  justify-content: center;
-}
-.container {
-  max-width: 600px;
-  margin: 40px;
-}
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-}
-button {
-  margin-top: 20px;
-  padding: 10px;
-  background: #4f46e5;
-  color: white;
-  border: none;
-}
-</style>
-</head>
-
-<body>
-<div class="container">
-  <h1>JB CD Finder</h1>
-  <div id="app"></div>
-</div>
-
 <script>
-const URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+const URL = "https://script.google.com/macros/s/AKfycbzz1gZhN_cmd6izrZ8Nk8-HpPd-YzqxHgj3ihtvXenO_67PAexsYcpfZMDFIikf97B7/exec";
 
 let step = 0;
 const answers = {};
@@ -47,8 +7,8 @@ const answers = {};
 const questions = [
   { id: "firstName", text: "First name?" },
   { id: "email", text: "Email?" },
-  { id: "amount", text: "Amount?", options: ["500","1000","5000"] },
-  { id: "timeframe", text: "Timeframe?", options: ["3mo","6mo","12mo"] }
+  { id: "amount", text: "Amount?", options: ["500","1000","5000","10000+"] },
+  { id: "timeframe", text: "Timeframe?", options: ["3mo","6mo","12mo","18mo+"] }
 ];
 
 const app = document.getElementById("app");
@@ -61,14 +21,14 @@ function render() {
   if (q.options) {
     input = `<select id="val">
       <option value="">Select</option>
-      ${q.options.map(o=>`<option>${o}</option>`).join("")}
+      ${q.options.map(o=>`<option value="${o}">${o}</option>`).join("")}
     </select>`;
   } else {
     input = `<input id="val" />`;
   }
 
   app.innerHTML = `
-    <div>${q.text}</div>
+    <div style="margin-bottom:10px;">${q.text}</div>
     ${input}
     <button onclick="next()">Next</button>
   `;
@@ -89,21 +49,23 @@ function next() {
 }
 
 function submit() {
+  console.log("Sending:", answers);
+
   fetch(URL, {
     method: "POST",
     body: JSON.stringify(answers)
   })
-  .then(r=>r.text())
-  .then(res=>{
-    app.innerHTML = "Done ✔";
+  .then(r => r.text())
+  .then(res => {
+    console.log("Response:", res);
+    app.innerHTML = "<h3>Done ✔ Check your email</h3>";
   })
-  .catch(()=>{
-    app.innerHTML = "Error sending";
+  .catch(err => {
+    console.error(err);
+    app.innerHTML = "<h3>Error sending</h3>";
   });
 }
 
 render();
 </script>
-</body>
-</html>
 
