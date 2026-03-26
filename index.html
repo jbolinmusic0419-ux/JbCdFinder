@@ -119,13 +119,16 @@
     <div id="app"></div>
   </div>
 
-  <script>
-    https://script.google.com/macros/s/AKfycbzvXf9EkXJKA7CDh6B-rJr4vm2Thw06ri-8BOq1exp5eGJSwJw0t12mVowbJsXmuO7Y/exec
-    let step = 0;
-    let feedbackStep = 0;
-    const answers = {};
-    const feedback = {};
-    let builtResults = [];
+ <script>
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvXf9EkXJKA7CDh6B-rJr4vm2Thw06ri-8BOq1exp5eGJSwJw0t12mVowbJsXmuO7Y/exec";
+
+  let step = 0;
+  let feedbackStep = 0;
+  const answers = {};
+  const feedback = {};
+  let builtResults = [];
+</script>
+
 
     const questions = [
       { id: "firstName", text: "First, what’s your first name?", type: "text", placeholder: "Johnny" },
